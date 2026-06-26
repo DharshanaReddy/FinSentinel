@@ -73,7 +73,7 @@ def plot_confidence_vs_eps(df: pd.DataFrame) -> None:
     ax.text(2.5, ax.get_ylim()[1] * 0.85, "Cautious\n& Beat",
             ha="center", fontsize=9, color=PALETTE["primary"], alpha=0.8)
 
-    # Label top outliers
+    # Label top outliers by integrity gap
     top_gap = data.nlargest(5, "integrity_gap")
     for _, row in top_gap.iterrows():
         ax.annotate(
@@ -83,6 +83,18 @@ def plot_confidence_vs_eps(df: pd.DataFrame) -> None:
             textcoords="offset points",
             fontsize=7,
             color=PALETTE["accent"],
+            arrowprops={"arrowstyle": "->", "color": PALETTE["accent"], "lw": 0.8},
+        )
+    # Also label most honest (lowest gap, negative)
+    bottom_gap = data.nsmallest(3, "integrity_gap")
+    for _, row in bottom_gap.iterrows():
+        ax.annotate(
+            row["ticker"],
+            xy=(row["confidence_score"], row["eps_surprise"]),
+            xytext=(-30, 4),
+            textcoords="offset points",
+            fontsize=7,
+            color=PALETTE["primary"],
         )
 
     ax.set_xlabel("Executive Confidence Score (1–10)", fontsize=12)
