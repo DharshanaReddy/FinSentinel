@@ -87,8 +87,14 @@ SEC EDGAR 8-K filings          Yahoo Finance EPS data
          │                              │
          └──────────────┬───────────────┘
                         ▼
-           Heuristic NLP Sentiment Scoring
-        (keyword ratio: positive vs hedge words)
+         Sentiment Scoring Engine
+         ┌─────────────────────────────────┐
+         │  Primary:  OpenAI GPT-4o-mini   │
+         │  (structured JSON via API)      │
+         │                                 │
+         │  Fallback: Heuristic NLP        │
+         │  (positive/hedge keyword ratio) │
+         └─────────────────────────────────┘
                         │
                         ▼
            Integrity Gap Score Calculation
@@ -103,10 +109,12 @@ SEC EDGAR 8-K filings          Yahoo Finance EPS data
 
 ### Scoring Dimensions
 
+The scoring engine is designed around OpenAI's GPT-4o-mini, which receives the Management Discussion section and returns a structured JSON response. When no API key is configured, a heuristic fallback (positive/hedge keyword ratio) produces comparable directional scores.
+
 | Metric | Range | Description |
 |--------|-------|-------------|
-| `executive_confidence` | 1–10 | Ratio of positive words to hedging words in prepared remarks |
-| `forward_guidance_optimism` | 1–10 | Forward-looking positive language density |
+| `executive_confidence` | 1–10 | Overall assertiveness and bullishness of executive tone |
+| `forward_guidance_optimism` | 1–10 | Optimism of forward-looking statements and guidance |
 | `hedging_language_count` | Integer | Occurrences of "challenging", "uncertain", "headwinds", etc. |
 | `numerical_commitments` | Integer | Sentences containing specific % or $ targets |
 
