@@ -209,4 +209,4 @@ python main.py --step visualize   # Generate charts
 *Built with Python, SEC EDGAR, and Yahoo Finance. Data covers 2021–2026.*
 
 ---
-*Built by [Dharshana Reddy Ramesh](https://linkedin.com/in/r-dharshana-reddy) — seeking data/business analyst roles in fintech.*
+*Built by [Dharshana Reddy Ramesh](https://www.linkedin.com/in/r-dharshana-reddy/) — seeking data/business analyst roles in fintech.*
