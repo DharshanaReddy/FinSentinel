@@ -34,7 +34,8 @@ _ARCHIVES_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/"
 _HEDGE_WORDS = [
     "challenging", "uncertain", "uncertainty", "headwinds", "difficult",
     "volatile", "volatility", "cautious", "risk", "concern", "pressure",
-    "macro", "slowdown", "decelerate",
+    "macro", "slowdown", "decelerate", "softness", "deteriorat",
+    "weakening", "pullback", "contraction", "subdued", "muted",
 ]
 
 _MGMT_MARKERS = [
