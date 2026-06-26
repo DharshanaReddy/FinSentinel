@@ -88,10 +88,23 @@ def top_misleading_quarters(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
     """Quarters where exec language was most optimistic but results were worst."""
     worst = df.dropna(subset=["eps_surprise", "confidence_score"]).copy()
     worst = worst[worst["integrity_gap"] > 0]
+    # Secondary sort: among equal gaps, rank by worst stock reaction
     return (
-        worst.sort_values("integrity_gap", ascending=False)
+        worst.sort_values(["integrity_gap", "stock_reaction"], ascending=[False, True])
         .head(n)[["ticker", "quarter", "confidence_score", "optimism_score",
                    "hedging_count", "eps_surprise", "stock_reaction", "integrity_gap"]]
+        .reset_index(drop=True)
+    )
+
+
+def worst_stock_reactions(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
+    """Quarters with the largest negative stock reaction after earnings."""
+    data = df.dropna(subset=["stock_reaction"]).copy()
+    return (
+        data[data["stock_reaction"] < 0]
+        .sort_values("stock_reaction")
+        .head(n)[["ticker", "quarter", "confidence_score", "eps_surprise",
+                   "stock_reaction", "integrity_gap"]]
         .reset_index(drop=True)
     )
 
