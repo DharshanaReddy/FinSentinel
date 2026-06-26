@@ -65,6 +65,10 @@ COMPANIES = [
     {"ticker": "WRLD",  "name": "World Acceptance"},
     {"ticker": "RM",    "name": "Regional Management"},
     {"ticker": "ATLC",  "name": "Atlanticus Holdings"},
+    {"ticker": "NRDS",  "name": "NerdWallet"},
+    {"ticker": "OPFI",  "name": "OppFi"},
+    {"ticker": "LPRO",  "name": "Open Lending"},
+    {"ticker": "FLFR",  "name": "Flaherty & Crumrine"},
 ]
 
 
