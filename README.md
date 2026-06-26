@@ -5,76 +5,117 @@
 
 ---
 
-## Why This Matters
+## Key Findings (Real Data — 25 Companies, 72 Quarters)
 
-Earnings calls are the primary channel through which public company executives communicate with investors. Research consistently shows that executive tone and language choices move markets — but do they reflect reality? In fintech, where growth narratives drive outsized valuations, the risk of misleading communication is especially high.
+### Integrity Gap Leaderboard — Most Overconfident Executives
 
-FinSentinel answers: *Which executives were most overconfident relative to their actual results?*
+| Rank | Ticker | Company | Avg Confidence | Avg EPS Surprise | Integrity Gap |
+|------|--------|---------|---------------|-----------------|--------------|
+| 1 | COIN | Coinbase Global | 8.3/10 | -$1.53 | **5.20** |
+| 2 | WRLD | World Acceptance | 9.0/10 | -$0.58 | **4.80** |
+| 3 | HOOD | Robinhood Markets | 10.0/10 | -$0.01 | **4.52** |
+| 4 | SOFI | SoFi Technologies | 10.0/10 | $0.00 | **4.49** |
+| 5 | PYPL | PayPal | 10.0/10 | +$0.01 | **4.48** |
+
+> **Integrity Gap** = Executive Confidence Score (1–10) minus Normalized EPS Result (1–10).  
+> A gap above 2.0 is considered materially misleading.
+
+### Most Misleading Single Quarters
+
+| Ticker | Quarter | Confidence | EPS Surprise | Stock Reaction | Gap |
+|--------|---------|-----------|-------------|---------------|-----|
+| COIN | Q1 2026 | 10.0 | **-$3.43** | -7.9% | **9.00** |
+| WRLD | Q1 2026 | 10.0 | -$1.12 | **-17.6%** | 7.02 |
+| PYPL | Q1 2026 | 10.0 | -$0.06 | **-20.3%** | 4.63 |
+| FLYW | Q3 2025 | 10.0 | -$0.05 | +0.5% | 4.61 |
+| PGY  | Q3 2025 | 10.0 | -$0.03 | -2.4% | 4.57 |
+
+### Most Honest Executives (Lowest Gap)
+
+| Ticker | Company | Avg Gap | Why |
+|--------|---------|---------|-----|
+| MQ | Marqeta | 0.11 | Consistently tempered tone, high hedging language |
+| OPEN | Opendoor | -0.53 | Under-promised, results came in better than tone implied |
+| DAVE | Dave Inc | **-1.06** | Most conservative communicator in the dataset |
+
+---
+
+## Charts
+
+### Confidence Score vs EPS Beat/Miss (All 72 Quarters)
+![Confidence vs EPS](output/01_confidence_vs_eps.png)
+
+### Top 10 Companies by Integrity Gap
+![Top 10 Integrity Gap](output/02_top10_integrity_gap.png)
+
+### Sentiment vs Stock Reaction — Top 3 Most Misleading Companies
+![Sentiment vs Stock](output/03_sentiment_vs_stock.png)
+
+---
+
+## Three Specific Insights From The Data
+
+**1. Coinbase's Q1 2026 call was the single most misleading in the dataset.**  
+Executives scored a 10/10 confidence rating from their prepared remarks — record revenue language, aggressive expansion talk — but reported EPS came in $3.43 below estimates. The stock fell 7.9% the following day. Integrity Gap: 9.0.
+
+**2. PayPal's Q1 2026 call shows the "confident decline" pattern.**  
+With a 10/10 confidence score and -$0.06 EPS miss, the stock dropped 20.3% — the largest single-day post-earnings drop in the dataset. This is a textbook case of management narrative masking deteriorating fundamentals.
+
+**3. Dave Inc and Opendoor are the dataset's most honest communicators.**  
+Both companies used high hedging language counts (10+ occurrences per call) and scored low on confidence (5/10) — and their results actually came in *above* what their cautious tone suggested. Negative integrity gaps signal executives who under-promise and over-deliver.
+
+---
+
+## Why This Matters to Fintech Analysts
+
+Earnings calls move markets. When executives systematically communicate more confidence than results justify, retail investors who trade on that tone are disadvantaged. This project gives you a quantitative way to:
+
+- Flag companies where management narrative diverges from financial reality
+- Track whether a company's communication integrity improves or worsens over time
+- Build a pre-earnings filter: companies with historically high gaps deserve extra skepticism
 
 ---
 
 ## Methodology
 
-### Pipeline Overview
-
 ```
 SEC EDGAR 8-K filings          Yahoo Finance EPS data
          │                              │
          ▼                              ▼
-   Transcript extraction        EPS actual vs estimate
+   EX-99.1 press release        EPS actual vs estimate
+   text extraction              + stock price reaction
          │                              │
          └──────────────┬───────────────┘
                         ▼
-              LLM Sentiment Scoring
-          (GPT-4o-mini via OpenAI API)
+           Heuristic NLP Sentiment Scoring
+        (keyword ratio: positive vs hedge words)
                         │
                         ▼
            Integrity Gap Score Calculation
+           Gap = Confidence(1-10) − EPS_Normalized(1-10)
                         │
               ┌─────────┴─────────┐
               ▼                   ▼
           CSV exports       Markdown report
-              │
-              ▼
+              +
          Matplotlib charts
 ```
 
-### Integrity Gap Score
-
-```
-Integrity Gap = Executive Confidence Score (1–10)
-              − Normalized EPS Result (1–10)
-```
-
-- **Positive gap** → Executive was more optimistic than results justified
-- **Negative gap** → Executive under-promised and over-delivered (rare and admirable)
-- **Gap > 2** → Considered materially misleading by this methodology
-
-### LLM Scoring Dimensions
-
-Each transcript's Management Discussion section is scored by GPT-4o-mini on:
+### Scoring Dimensions
 
 | Metric | Range | Description |
 |--------|-------|-------------|
-| `executive_confidence` | 1–10 | Overall assertiveness and bullishness of tone |
-| `forward_guidance_optimism` | 1–10 | How rosy the outlook for future quarters appears |
+| `executive_confidence` | 1–10 | Ratio of positive words to hedging words in prepared remarks |
+| `forward_guidance_optimism` | 1–10 | Forward-looking positive language density |
 | `hedging_language_count` | Integer | Occurrences of "challenging", "uncertain", "headwinds", etc. |
-| `numerical_commitments` | Integer | Specific numerical targets given (revenue %, margin, users) |
+| `numerical_commitments` | Integer | Sentences containing specific % or $ targets |
 
----
+### EPS Normalization
 
-## Key Findings
-
-> *Note: Run the pipeline with real data to populate your own findings. The examples below are illustrative of the analysis pattern.*
-
-### Finding 1: Optimism Peaks Before Worst Misses
-Across the fintech universe, executive confidence scores averaged **6.8/10** in quarters where EPS was subsequently missed by >$0.10. This suggests a consistent pattern of over-optimism before bad results — rather than honest pre-signaling of challenges.
-
-### Finding 2: Hedging Language Is a Lagging, Not Leading, Indicator
-Companies with high hedging word counts (>15 per call) typically had already reported a miss in the *prior* quarter. Executives hedge after disappointment, not before — which limits the signal value of cautious language for investors trying to anticipate results.
-
-### Finding 3: Small-Cap Fintech Shows Larger Integrity Gaps
-Companies with market caps under $2B showed 40% larger average integrity gaps than large-cap peers (PayPal, Block). Smaller companies face stronger pressure to maintain investor confidence and may face fewer institutional accountability checks on their narrative.
+```python
+# Map EPS surprise (dollars) → 1–10 scale, clipped at ±$2
+eps_normalized = 1 + (clip(eps_surprise, -2, 2) + 2) / 4 * 9
+```
 
 ---
 
@@ -82,106 +123,79 @@ Companies with market caps under $2B showed 40% larger average integrity gaps th
 
 ```
 FinSentinel/
-├── main.py                          # Pipeline entry point
+├── main.py                          # Pipeline entry point (--step flag)
 ├── requirements.txt
-├── .env.example                     # Copy to .env and add your OpenAI key
-├── finsentinel.log                  # Run log (auto-generated)
+├── .env.example                     # Copy to .env, add OPENAI_API_KEY (optional)
 ├── src/
-│   ├── database.py                  # SQLite schema + helpers
+│   ├── database.py                  # SQLite schema: companies, transcripts,
+│   │                                #   financial_results, sentiment_scores
 │   ├── data_collection/
-│   │   ├── sec_edgar.py             # EDGAR 8-K transcript fetching
-│   │   └── financial_data.py        # yfinance EPS + stock reaction data
+│   │   ├── sec_edgar.py             # EDGAR CIK lookup → 8-K → EX-99.1 text
+│   │   └── financial_data.py        # yfinance EPS actuals + stock reactions
 │   ├── analysis/
-│   │   ├── sentiment.py             # OpenAI LLM scoring
-│   │   └── integrity_gap.py         # Integrity Gap computation + report
+│   │   ├── sentiment.py             # NLP scoring (OpenAI or heuristic fallback)
+│   │   └── integrity_gap.py         # Gap calculation, CSV export, MD report
 │   └── visualization/
-│       └── charts.py                # Matplotlib charts
+│       └── charts.py                # 3 matplotlib charts
 ├── data/
-│   └── finsentinel.db               # SQLite database (auto-generated)
+│   └── finsentinel.db               # SQLite (72 quarters across 25 companies)
 └── output/
     ├── all_scores.csv               # Full per-quarter dataset
     ├── company_integrity_gaps.csv   # Aggregated per company
     ├── worst_quarters.csv           # Top misleading quarters
-    ├── findings.md                  # Auto-generated markdown report
-    ├── 01_confidence_vs_eps.png     # Scatter: confidence vs EPS beat/miss
-    ├── 02_top10_integrity_gap.png   # Bar: top 10 integrity gap companies
-    └── 03_sentiment_vs_stock.png    # Time series: sentiment vs stock reaction
+    ├── findings.md                  # Auto-generated report
+    ├── 01_confidence_vs_eps.png
+    ├── 02_top10_integrity_gap.png
+    └── 03_sentiment_vs_stock.png
 ```
 
 ---
 
-## Setup
-
-### 1. Clone and install dependencies
+## Setup & Usage
 
 ```bash
-git clone https://github.com/your-username/FinSentinel.git
+git clone https://github.com/DharshanaReddy/FinSentinel.git
 cd FinSentinel
 pip install -r requirements.txt
-```
 
-### 2. Configure environment variables
-
-```bash
+# Optional: add OpenAI key for LLM scoring (heuristic fallback used if absent)
 cp .env.example .env
-# Edit .env and add your OpenAI API key
-```
 
-```
-OPENAI_API_KEY=sk-...
-```
-
-> **No OpenAI key?** The pipeline includes a heuristic fallback scorer — results will be less precise but the pipeline will still run end-to-end.
-
-### 3. Run the full pipeline
-
-```bash
+# Run full pipeline
 python main.py
-```
 
-Or run individual steps:
-
-```bash
-python main.py --step collect     # Pull data from EDGAR + Yahoo Finance
-python main.py --step score       # Run LLM sentiment analysis
-python main.py --step analyze     # Compute Integrity Gap + export CSVs
+# Or run individual steps
+python main.py --step collect     # Pull SEC EDGAR + Yahoo Finance data
+python main.py --step score       # Run sentiment analysis
+python main.py --step analyze     # Compute Integrity Gap scores + export
 python main.py --step visualize   # Generate charts
 ```
 
 ---
 
-## Technologies Used
+## Technologies
 
 | Technology | Purpose |
 |-----------|---------|
-| **Python 3.11+** | Core language |
-| **SQLite** | Local data storage (no server needed) |
-| **OpenAI API** (GPT-4o-mini) | LLM sentiment scoring of transcripts |
-| **SEC EDGAR API** | Free public API for 8-K filings and transcripts |
-| **yfinance** | EPS estimates, actuals, and stock price history |
-| **pandas** | Data manipulation and aggregation |
-| **matplotlib / seaborn** | Visualization |
-| **python-dotenv** | Environment variable management |
-| **BeautifulSoup4 / lxml** | HTML parsing of EDGAR filing pages |
+| Python 3.11+ | Core language |
+| SQLite + sqlite3 | Local database (4 tables, no server needed) |
+| SEC EDGAR API | Free public 8-K filing retrieval via CIK-based submissions endpoint |
+| yfinance | EPS estimates, actuals, and post-earnings stock price reactions |
+| OpenAI API (optional) | GPT-4o-mini LLM scoring — falls back to heuristics if unavailable |
+| pandas | Data aggregation and CSV export |
+| matplotlib | Charts (scatter, bar, dual-axis time series) |
+| BeautifulSoup4 / lxml | HTML parsing of EDGAR filing documents |
+| python-dotenv | Environment variable management |
 
 ---
 
-## Data Sources
+## Limitations
 
-- **SEC EDGAR Full-Text Search**: `https://efts.sec.gov/LATEST/search-index` — free, no registration required, subject to SEC fair-use policy (~10 req/s)
-- **Yahoo Finance via yfinance**: Free, no API key required, subject to Yahoo ToS
-
----
-
-## Limitations & Caveats
-
-- Not all 8-K filings contain earnings call transcripts — some companies publish transcripts separately or use third-party services (Seeking Alpha, Motley Fool). Coverage varies by company.
-- EPS surprise alone is an imperfect proxy for "misleading" communication. A miss can result from macro factors outside management's control.
-- LLM scoring introduces model-dependent noise. All scores should be treated as directional, not precise.
-- **This project is for research and educational purposes only. Nothing here constitutes investment advice.**
+- Heuristic NLP scoring (keyword ratios) is a proxy for executive sentiment, not a ground truth. LLM scoring via OpenAI produces more nuanced results.
+- EPS surprise alone doesn't capture the full picture — revenue, margins, and guidance also matter.
+- Coverage depends on which companies file earnings press releases as EDGAR 8-K exhibits. Some file separately or use IR sites directly.
+- **Not investment advice.**
 
 ---
 
-## License
-
-MIT License. See `LICENSE` for details.
+*Built with Python, SEC EDGAR, and Yahoo Finance. Data covers 2021–2026.*
