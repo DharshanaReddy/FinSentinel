@@ -21,6 +21,8 @@ def _normalize_eps_surprise(surprise: float, clip: float = 2.0) -> float:
     Positive = beat, negative = miss.
     clip defines the dollar range that maps to the extremes.
     """
+    if surprise is None or surprise != surprise:  # handle NaN
+        return 5.0
     clamped = max(-clip, min(clip, surprise))
     # scale [-clip, +clip] -> [1, 10]
     return round(1 + (clamped + clip) / (2 * clip) * 9, 2)
